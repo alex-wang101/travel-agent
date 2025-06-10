@@ -1,6 +1,5 @@
 from google.cloud import bigquery
 import re
-import pandas as pd
 
 class FlightAnalyticsAgent:
     """Agent responsible for analyzing historical flight data.
@@ -18,6 +17,47 @@ class FlightAnalyticsAgent:
             print(f"Error initializing BigQuery client: {str(e)}")
             print("Make sure you have authenticated with 'gcloud auth application-default login'")
             self.client = None
+            
+        # Dictionary mapping common airport names to their IATA codes
+        self.airport_mapping = {
+            # US Airports
+            'JFK': 'JFK', 'JOHN F KENNEDY': 'JFK', 'KENNEDY': 'JFK', 'NEW YORK JFK': 'JFK',
+            'LAX': 'LAX', 'LOS ANGELES': 'LAX', 'LOS ANGELES INTERNATIONAL': 'LAX',
+            'ORD': 'ORD', 'CHICAGO': 'ORD', 'CHICAGO OHARE': 'ORD', "O'HARE": 'ORD',
+            'ATL': 'ATL', 'ATLANTA': 'ATL', 'HARTSFIELD': 'ATL', 'HARTSFIELD JACKSON': 'ATL',
+            'DFW': 'DFW', 'DALLAS': 'DFW', 'DALLAS FORT WORTH': 'DFW',
+            'DEN': 'DEN', 'DENVER': 'DEN', 'DENVER INTERNATIONAL': 'DEN',
+            'SFO': 'SFO', 'SAN FRANCISCO': 'SFO',
+            'SEA': 'SEA', 'SEATTLE': 'SEA', 'SEATAC': 'SEA',
+            'MIA': 'MIA', 'MIAMI': 'MIA',
+            'BOS': 'BOS', 'BOSTON': 'BOS', 'LOGAN': 'BOS',
+            'LGA': 'LGA', 'LA GUARDIA': 'LGA', 'LAGUARDIA': 'LGA',
+            'EWR': 'EWR', 'NEWARK': 'EWR',
+            'IAD': 'IAD', 'DULLES': 'IAD', 'WASHINGTON DULLES': 'IAD',
+            'DCA': 'DCA', 'REAGAN': 'DCA', 'RONALD REAGAN': 'DCA',
+            'PHX': 'PHX', 'PHOENIX': 'PHX',
+            'IAH': 'IAH', 'HOUSTON': 'IAH',
+            'MCO': 'MCO', 'ORLANDO': 'MCO',
+            'LAS': 'LAS', 'LAS VEGAS': 'LAS',
+            'MSP': 'MSP', 'MINNEAPOLIS': 'MSP', 'MINNEAPOLIS ST PAUL': 'MSP',
+            'DTW': 'DTW', 'DETROIT': 'DTW',
+            'PHL': 'PHL', 'PHILADELPHIA': 'PHL',
+            'CLT': 'CLT', 'CHARLOTTE': 'CLT',
+            'SAN': 'SAN', 'SAN DIEGO': 'SAN',
+            'PDX': 'PDX', 'PORTLAND': 'PDX',
+            
+            # International Airports
+            'LHR': 'LHR', 'LONDON HEATHROW': 'LHR', 'HEATHROW': 'LHR',
+            'CDG': 'CDG', 'PARIS': 'CDG', 'CHARLES DE GAULLE': 'CDG',
+            'FRA': 'FRA', 'FRANKFURT': 'FRA',
+            'AMS': 'AMS', 'AMSTERDAM': 'AMS', 'SCHIPHOL': 'AMS',
+            'HKG': 'HKG', 'HONG KONG': 'HKG',
+            'SYD': 'SYD', 'SYDNEY': 'SYD',
+            'NRT': 'NRT', 'TOKYO': 'NRT', 'NARITA': 'NRT',
+            'YYZ': 'YYZ', 'TORONTO': 'YYZ',
+            'MEX': 'MEX', 'MEXICO CITY': 'MEX',
+            'DXB': 'DXB', 'DUBAI': 'DXB'
+        }
     
     def extract_airports(self, query):
         """Extract origin and destination airport codes from the query.
@@ -28,18 +68,69 @@ class FlightAnalyticsAgent:
         Returns:
             Tuple of (origin, destination) airport codes, or (None, None) if not found
         """
-        # Common airport code pattern: 3 uppercase letters
+        # First try to find direct airport codes (3 uppercase letters)
         airport_pattern = r'\b([A-Z]{3})\b'
-        
-        # Find all airport codes in the query
         uppercase_query = query.upper()
         airports = re.findall(airport_pattern, uppercase_query)
         
-        # If we found at least two airport codes, assume first is origin, second is destination
         if len(airports) >= 2:
             return airports[0], airports[1]
         
-        return None, None
+        # Look for common patterns in flight queries with airport codes
+        from_pattern = r'from\s+([A-Z]{3})'
+        to_pattern = r'to\s+([A-Z]{3})'
+        
+        from_match = re.search(from_pattern, uppercase_query)
+        to_match = re.search(to_pattern, uppercase_query)
+        
+        if from_match and to_match:
+            return from_match.group(1), to_match.group(1)
+        
+        # If we can't find airport codes, try to find airport names
+        words = uppercase_query.split()
+        
+        # Try to find airport names in the query
+        origin = None
+        destination = None
+        
+        # Look for airport names after 'from' and 'to'
+        if 'FROM' in words:
+            from_index = words.index('FROM')
+            # Check for airport names in the next few words
+            for i in range(1, min(4, len(words) - from_index)):
+                potential_name = ' '.join(words[from_index + 1:from_index + i + 1])
+                if potential_name in self.airport_mapping:
+                    origin = self.airport_mapping[potential_name]
+                    break
+        
+        if 'TO' in words:
+            to_index = words.index('TO')
+            # Check for airport names in the next few words
+            for i in range(1, min(4, len(words) - to_index)):
+                potential_name = ' '.join(words[to_index + 1:to_index + i + 1])
+                if potential_name in self.airport_mapping:
+                    destination = self.airport_mapping[potential_name]
+                    break
+        
+        # If we still don't have both origin and destination, try scanning for any airport name
+        if not origin or not destination:
+            # Try combinations of 1-3 consecutive words
+            for i in range(len(words)):
+                for j in range(1, 4):
+                    if i + j <= len(words):
+                        potential_name = ' '.join(words[i:i+j])
+                        if potential_name in self.airport_mapping:
+                            # If we haven't found origin yet, this is origin
+                            if not origin:
+                                origin = self.airport_mapping[potential_name]
+                            # Otherwise, if we haven't found destination, this is destination
+                            elif not destination:
+                                destination = self.airport_mapping[potential_name]
+                            # If we have both, we can stop
+                            if origin and destination:
+                                break
+        
+        return origin, destination
     
     def extract_year(self, query):
         """Extract year from the query if present.
