@@ -68,37 +68,6 @@ class InquiryRouterAgent:
         
         return None
     
-    def extract_airports(self, query):
-        """Extract origin and destination airport codes from the query.
-        
-        Args:
-            query: User's query string
-            
-        Returns:
-            Tuple of (origin, destination) airport codes, or (None, None) if not found
-        """
-        # Common airport code pattern: 3 uppercase letters
-        airport_pattern = r'\b([A-Z]{3})\b'
-        
-        # Find all airport codes in the query
-        uppercase_query = query.upper()
-        airports = re.findall(airport_pattern, uppercase_query)
-        
-        # If we found at least two airport codes, assume first is origin, second is destination
-        if len(airports) >= 2:
-            return airports[0], airports[1]
-        
-        # If only one airport code is found, check context for the other
-        elif len(airports) == 1:
-            if "TO" in uppercase_query or "→" in query:
-                # Format: X to Y, where Y is the destination
-                return self.conversation_memory.get("last_origin"), airports[0]
-            elif "FROM" in uppercase_query:
-                # Format: from X to Y, where X is the origin
-                return airports[0], self.conversation_memory.get("last_destination")
-        
-        return None, None
-    
     def classify_intent_with_llm(self, query):
         """Use Gemini to classify the user's intent.
         
@@ -276,8 +245,8 @@ class InquiryRouterAgent:
                     return self.flight_analytics_agent.analyze_flight_data(query)
         
         # Fallback to rule-based classification
-        flight_number = self.extract_flight_number(query)
-        origin, destination = self.extract_airports(query)
+        flight_number = self.flight_status_agent.extract_flight_number(query)
+        origin, destination = self.flight_analytics_agent.extract_airports(query)
         
         # If a flight number is found, route to the Flight Status Agent
         if flight_number:
