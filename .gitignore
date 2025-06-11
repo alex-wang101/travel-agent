@@ -1,1 +1,36 @@
 .env
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+
+# Build files
+/build
+/dist
+
+# Cache
+.cache/
+.npm/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.env
+*.egg-info/
+
