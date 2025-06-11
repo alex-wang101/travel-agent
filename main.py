@@ -6,6 +6,7 @@ from agents.flight_status_agent import FlightStatusAgent
 from agents.flight_analytics_agent import FlightAnalyticsAgent
 import colorama
 from colorama import Fore, Style
+from agents.init import inquiry_router, flight_status_agent, flight_analytics_agent
 
 def print_welcome():
     """Print a welcome message for the Smart Travel Assistant."""
@@ -23,18 +24,6 @@ def main():
     """Main function to run the Smart Travel Assistant."""
     # Initialize colorama for cross-platform colored terminal output
     colorama.init()
-    
-    # Load environment variables
-    load_dotenv()
-    
-    # Get API keys from environment variables
-    aviation_api_key = os.getenv("AVIATIONSTACK_API_KEY")
-    
-    # Check if API key exists
-    if not aviation_api_key:
-        print(Fore.RED + "Error: AVIATIONSTACK_API_KEY not found in .env file" + Style.RESET_ALL)
-        print("Please create a .env file with your AviationStack API key.")
-        sys.exit(1)
     
     # Initialize agents
     try:

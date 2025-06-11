@@ -13,25 +13,52 @@ function App() {
   ]);
   const [inputValue, setInputValue] = useState('');
   
-  const handleSendMessage = (e) => {
+  const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!inputValue.trim()) return;
     
     // Add user message
-    setMessages(prev => [...prev, { text: inputValue, sender: "user" }]);
-    
-    // Simulate assistant response (in a real app, this would call your Python backend)
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev, 
-        { 
-          text: "I'm processing your request. In a complete implementation, this would connect to your Python backend.", 
-          sender: "assistant" 
-        }
-      ]);
-    }, 1000);
-    
+    const userMessage = inputValue;
+    setMessages(prev => [...prev, { text: userMessage, sender: "user" }]);
     setInputValue('');
+    
+    try {
+      // Show loading indicator
+      setMessages(prev => [...prev, { text: "Thinking...", sender: "assistant", isLoading: true }]);
+      
+      // Call the backend API
+      const response = await fetch('http://localhost:8000/api/query', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: userMessage })
+      });
+      
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      
+      const data = await response.json();
+      
+      // Remove loading message and add the real response
+      setMessages(prev => {
+        const filtered = prev.filter(msg => !msg.isLoading);
+        return [...filtered, { text: data.response, sender: "assistant" }];
+      });
+      
+    } catch (error) {
+      console.error('Error:', error);
+      
+      // Remove loading message and add error message
+      setMessages(prev => {
+        const filtered = prev.filter(msg => !msg.isLoading);
+        return [...filtered, { 
+          text: "Sorry, there was an error processing your request. Please try again.", 
+          sender: "assistant" 
+        }];
+      });
+    }
   };
 
   return (
