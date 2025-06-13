@@ -16,7 +16,7 @@ def print_welcome():
     print(Fore.YELLOW + "\nWelcome to your Smart Travel Assistant!")
     print("You can ask about:")
     print("  1. Flight status - information on flight number (e.g., 'What is the status of flight AA123?')")
-    print("  2. Flight analysis - information on the delay from origin to destination (e.g., 'What is the most on time flight from JFK to LAX?'")
+    print("  2. Flight analysis - information on the delay from origin to destination (e.g., 'What is the most on time flight from JFK to LAX?')")
     print(Fore.GREEN + "\nType 'exit' to quit the assistant." + Style.RESET_ALL)
     print("\n")
 

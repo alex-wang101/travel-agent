@@ -74,22 +74,40 @@ Type 'exit' to quit the assistant.
 ### Example 1: Flight Status Query
 
 ```
-How can I help you? What is the status of flight AA100?
+============================================================
+               SMART TRAVEL ASSISTANT
+============================================================
+
+Welcome to your Smart Travel Assistant!
+You can ask about:
+  1. Flight status - information on flight number (e.g., 'What is the status of flight AA123?')
+  2. Flight analysis - information on the delay from origin to destination (e.g., 'What is the most on time flight from JFK to LAX?'
+
+Type 'exit' to quit the assistant.
+
+
+
+How can I help you? what is the status of flight aa123
 
 Processing your request...
-Routing to Flight Status Agent with flight number: AA100
+LLM classified as flight status query with flight number: AA123
 
 Result:
-Flight AA100 operated by American Airlines
-Route: Chicago (ORD) to London (LHR)
-Status: Scheduled
-Scheduled departure: 2025-06-10T21:40:00+00:00
-Scheduled arrival: 2025-06-11T11:20:00+00:00
-Departure: Terminal 3, Gate K19
+Flight AA123 operated by American Airlines
+Route: Dallas/Fort Worth International (DFW) to Kahului (OGG)
+Status: Active
+Scheduled departure: 2025-06-12T11:11:00+00:00
+Scheduled arrival: 2025-06-12T14:00:00+00:00
+Departure delay: 20 minutes
+Departure: Terminal A, Gate A34
+
+
+How can I help you? 
 ```
 
 ### Example 2: Flight Analytics Query
 
+```
 ============================================================
                SMART TRAVEL ASSISTANT
 ============================================================
@@ -116,30 +134,8 @@ Based on historical data for flights from JFK to LAX, the airlines with the best
 #3. B6 (avg delay: 2.0 min, based on 1669 flights)
 #4. VX (avg delay: 2.1 min, based on 1779 flights)
 #5. DL (avg delay: -3.8 min, based on 2487 flights)
-
-
-### Example 3: Follow-up Query with Memory
-
 ```
-How can I help you? What about from LAX to ORD?
 
-Processing your request...
-Detected follow-up query. Enhanced query: 'Show me flights from LAX to ORD'
-Routing to Flight Analytics Agent
-
-Result:
-Based on historical data for flights from LAX to ORD in 2022:
-The cheapest fare found was $135.75.
-The average fare was $285.50.
-The main carriers were: AA, UA, NK.
-
-Top 5 cheapest flights:
-1. $135.75 - NK 955 on 2022-05-10
-2. $142.25 - AA 1288 on 2022-03-15
-3. $155.00 - UA 2121 on 2022-02-22
-4. $168.50 - AA 2500 on 2022-06-07
-5. $175.25 - UA 1777 on 2022-04-19
-```
 
 ## Architecture Design
 
