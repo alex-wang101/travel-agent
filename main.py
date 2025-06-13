@@ -15,8 +15,8 @@ def print_welcome():
     print("="*60 + Style.RESET_ALL)
     print(Fore.YELLOW + "\nWelcome to your Smart Travel Assistant!")
     print("You can ask about:")
-    print("  1. Flight status (e.g., 'What is the status of flight AA123?')")
-    print("  2. Flight price analysis (e.g., 'What were the cheapest flights from JFK to LAX last year?')")
+    print("  1. Flight status - information on flight number (e.g., 'What is the status of flight AA123?')")
+    print("  2. Flight analysis - information on the delay from origin to destination (e.g., 'What is the most on time flight from JFK to LAX?'")
     print(Fore.GREEN + "\nType 'exit' to quit the assistant." + Style.RESET_ALL)
     print("\n")
 
@@ -24,6 +24,12 @@ def main():
     """Main function to run the Smart Travel Assistant."""
     # Initialize colorama for cross-platform colored terminal output
     colorama.init()
+    try: 
+        load_dotenv()
+        aviation_api_key = os.getenv("AVIATIONSTACK_API_KEY")
+    except Exception as e:
+        print(Fore.RED + f"\nAn error occurred: {str(e)}" + Style.RESET_ALL)
+        sys.exit(1)
     
     # Initialize agents
     try:

@@ -46,6 +46,28 @@ class InquiryRouterAgent:
             except Exception as e:
                 print(f"Failed to initialize Gemini API: {str(e)}")
                 print("Falling back to rule-based routing")
+
+    def extract_airports(self, query):
+        """Extract origin and destination airport codes from the query.
+        
+        Args:
+            query: User's query string
+            
+        Returns:Add commentMore actions
+            Tuple of (origin, destination) airport codes, or (None, None) if not found
+        """
+        # Common airport code pattern: 3 uppercase letters
+        airport_pattern = r'\b([A-Z]{3})\b'
+        
+        # Find all airport codes in the query
+        uppercase_query = query.upper()
+        airports = re.findall(airport_pattern, uppercase_query)
+        
+        # If we found at least two airport codes, assume first is origin, second is destination
+        if len(airports) >= 2:
+            return airports[0], airports[1]
+        
+        return None, None
     
     def extract_flight_number(self, query):
         """Extract a flight number from the user query if present.
@@ -84,8 +106,10 @@ class InquiryRouterAgent:
             # Create a prompt for the LLM
             prompt = f"""
             Classify the following travel query into one of two categories:
-            1. flight_status - If the query is asking about a specific flight's status, delay, etc.
-            2. flight_analytics - If the query is asking about historical flight data, prices, trends, etc.
+            1. flight_status 
+            2. flight_analytics
+            Classify the query as flight_status ONLY if the query contains Format: XX123 or XX1234 (the X represents arbitrary letters from the alphabet and the numbers are arbitrary as well)
+            classify the rest as flight_analytics
             
             Also extract any relevant entities:
             - flight_number: The flight number if present (e.g., AA123)

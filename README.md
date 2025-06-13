@@ -90,25 +90,33 @@ Departure: Terminal 3, Gate K19
 
 ### Example 2: Flight Analytics Query
 
-```
-How can I help you? What were the cheapest flights from SFO to JFK in 2022?
+============================================================
+               SMART TRAVEL ASSISTANT
+============================================================
+
+Welcome to your Smart Travel Assistant!
+You can ask about:
+  1. Flight status - information on flight number (e.g., 'What is the status of flight AA123?')
+  2. Flight analysis - information on the delay from origin to destination (e.g., 'What is the most on time flight from JFK to LAX?'
+
+Type 'exit' to quit the assistant.
+
+
+
+How can I help you? what is the most on time flight from jfk to lax
 
 Processing your request...
-Routing to Flight Analytics Agent
+LLM classified as flight analytics query with origin: jfk, destination: lax
 
 Result:
-Based on historical data for flights from SFO to JFK in 2022:
-The cheapest fare found was $150.00.
-The average fare was $320.75.
-The main carriers were: B6, DL, UA.
+Based on historical data for flights from JFK to LAX, the airlines with the best on-time performance were:
 
-Top 5 cheapest flights:
-1. $150.00 - B6 615 on 2022-02-15
-2. $165.50 - B6 2315 on 2022-03-22
-3. $172.25 - DL 1234 on 2022-01-18
-4. $189.99 - UA 2078 on 2022-04-05
-5. $210.50 - B6 1515 on 2022-02-28
-```
+#1. UA (avg delay: 1.6 min, based on 2037 flights)
+#2. AA (avg delay: -1.9 min, based on 3187 flights)
+#3. B6 (avg delay: 2.0 min, based on 1669 flights)
+#4. VX (avg delay: 2.1 min, based on 1779 flights)
+#5. DL (avg delay: -3.8 min, based on 2487 flights)
+
 
 ### Example 3: Follow-up Query with Memory
 
